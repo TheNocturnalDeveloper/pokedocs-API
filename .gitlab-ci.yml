@@ -1,7 +1,7 @@
 unittests:
   stage: test
   script:
-    - mvn verify
+    - mvn test
   artifacts:
     reports:
       junit:
