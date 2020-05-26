@@ -1,0 +1,24 @@
+version: '2'
+services:
+
+  postgres:
+    image: postgres:10.5
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "pokedocs"
+
+  # quarkus_api:
+  #   depends_on:
+  #     - postgres
+  #   build:
+  #     context: .
+  #     dockerfile: src/main/docker/Dockerfile.jvm
+  #   ports:
+  #     - "8080:8080"
+  #     - "8443:8443"
+  #   environment:
+  #     QUARKUS_PROFILE: staging      
