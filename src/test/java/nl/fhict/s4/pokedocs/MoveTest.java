@@ -1,15 +1,17 @@
 package nl.fhict.s4.pokedocs;
 
-import static io.restassured.RestAssured.given;
-
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.http.ContentType;
 import nl.fhict.s4.pokedocs.dal.Move;
 import nl.fhict.s4.pokedocs.dal.Type;
+import nl.fhict.s4.pokedocs.presentation.services.MoveService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
+import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +20,8 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 @Transactional
 public class MoveTest {
+
+    @Inject MoveService moveService;
 
     Type grassType;
     Move move;
@@ -36,81 +40,51 @@ public class MoveTest {
 
     @Test
     public void addMove() {
-        Move result = given()
-            .when()
-            .urlEncodingEnabled(true)
-            .param("name", "leafstorm")
-            .param("description", "shoots a storm of leaves at the opponent")
-            .param("type", grassType.id)
-            .post("/moves").then()
-            .statusCode(200)
-                .contentType(ContentType.JSON)
-                .extract()
-                .response()
-                .jsonPath()
-                .getObject("$", Move.class);
 
-        assertEquals(result.name, "leafstorm");
+        Response result = moveService.addMove("leafstorm", "shoots a storm of leaves at the opponent", grassType.id);
+        Move resultValue = (Move)result.getEntity();
+
+        assertEquals(200, result.getStatus());
+        assertEquals("leafstorm", resultValue.name);
     }
 
     @Test
     public void addMoveNameExists() {
-        given()
-            .when()
-            .urlEncodingEnabled(true)
-            .param("name", "razor leaf")
-            .param("description", "cuts the opponent using a sharp leaf")
-            .param("type", grassType.id)
-            .post("/moves").then()
-            .statusCode(409);
+        Response result = moveService.addMove("razor leaf", "", grassType.id);
+
+        assertEquals(409, result.getStatus());
     }
     
 
     @Test
     public void deleteMove() {
-        given()
-            .delete("/moves/" + move.id)
-            .then()
-                .statusCode(204);
+        Response result = moveService.deleteMove(move.id);
+
+        assertEquals(204, result.getStatus());
     }
 
     @Test
     public void getAllMoves() {
-        int moveCount = given()
-            .when()
-                .get("/moves")
-            .then()
-                .statusCode(200)
-                .contentType(ContentType.JSON)
-                .extract()
-                .response()
-                .jsonPath()
-                .getList("$")
-                .size();
+        Response result = moveService.getAllMoves();
+        List<?> resultValue = (List<?>)result.getEntity();
 
-        assertEquals(moveCount, 1);    
+        assertEquals(200, result.getStatus());
+        assertEquals(1, resultValue.size());
     }
 
     @Test
     public void getMove() {
-        Move result = given()
-            .when()
-            .get("/moves/" + move.id).then()
-            .statusCode(200)
-                .contentType(ContentType.JSON)
-                .extract()
-                .response()
-                .jsonPath()
-                .getObject("$", Move.class);
+        Response result = moveService.getMove(move.id);
+        Move resultValue = (Move)result.getEntity();
         
-        assertEquals(result.name, "razor leaf");
+        assertEquals(200, result.getStatus());
+        assertEquals(resultValue.name, "razor leaf");
     }
 
     @Test
     public void getMoveNotFound() {
-        given()
-            .when()
-            .get("/moves/" + -1).then()
-            .statusCode(404);
+        Response result = moveService.getMove((long) -1);
+        
+        assertEquals(404, result.getStatus());
     }
 }

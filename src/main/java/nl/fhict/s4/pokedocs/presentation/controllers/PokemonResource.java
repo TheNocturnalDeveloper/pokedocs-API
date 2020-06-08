@@ -17,25 +17,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import nl.fhict.s4.pokedocs.dal.Move;
-import nl.fhict.s4.pokedocs.dal.Pokemon;
-import nl.fhict.s4.pokedocs.dal.Type;
-
-import org.eclipse.microprofile.jwt.JsonWebToken;
-
-// import org.eclipse.microprofile.openapi.annotations.Operation;
-// import org.eclipse.microprofile.openapi.annotations.media.Content;
-// import org.eclipse.microprofile.openapi.annotations.media.Schema;
-// import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-// import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import nl.fhict.s4.pokedocs.presentation.services.PokemonService;
 
 
 
 @Path("pokemon")
 @RequestScoped
 public class PokemonResource {
-    @Inject
-    JsonWebToken jwt;
+
+    @Inject PokemonService pokemonService;
 
     //TODO: MOVE OPENAPI DATA TO YAML FILES
     //TODO: SWITCH TO TYPE ID INSTEAD OF NAME
@@ -47,7 +37,7 @@ public class PokemonResource {
         @QueryParam("typeId") Long typeId,
         @QueryParam("secondTypeId") Long secondTypeId
     ) {
-        return Response.ok(Pokemon.search(name, typeId, secondTypeId)).build();
+       return pokemonService.searchPokemon(name, typeId, secondTypeId);
     }
 
     @GET
@@ -55,9 +45,7 @@ public class PokemonResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPokemon(@PathParam("id") int  id) {
-        //TODO: HANDLE NULL?
-  
-        return Response.ok(Pokemon.findById(id)).build();
+        return pokemonService.getPokemon(id);
     }
 
 
@@ -65,10 +53,7 @@ public class PokemonResource {
     @PermitAll
     @Path("{id}")
     public Response deletePokemon(@PathParam("id") int id) {
-        //TODO: HANDLE NULL?
-        //TODO: STATUS AND RETURN VALUE OF DELETE?
-        Pokemon.findById(id).delete();
-        return Response.noContent().build();
+        return pokemonService.deletePokemon(id);
     }
 
 
@@ -83,15 +68,7 @@ public class PokemonResource {
         @FormParam("typeId") Long typeId, 
         @FormParam("secondTypeId") Long secondTypeId
     ) {
-        Pokemon pokemon = new Pokemon();
-        pokemon.pokeDexEntry = pokedexEntry; //check if unique
-        pokemon.name = name;
-        pokemon.type = Type.findById(typeId); //check null
-        pokemon.secondType = secondTypeId != null ? Type.findById(secondTypeId) : null;
-        
-        pokemon.persist();
-
-        return Response.ok(pokemon).build();
+       return pokemonService.addPokemon(pokedexEntry, name, typeId, secondTypeId);
     }
 
     @PUT
@@ -101,15 +78,10 @@ public class PokemonResource {
     @Path("{id}")
     public Response updatePokemon(
         @PathParam("id") int id,
-        @FormParam("type") long typeId, 
-        @FormParam("secondType") long secondTypeId
+        @FormParam("type") Long typeId, 
+        @FormParam("secondType") Long secondTypeId
     ) {
-        //TODO: UPDATE MOVES?
-        Pokemon pokemon = Pokemon.findById(id);
-        pokemon.type= Type.findById(typeId);
-        pokemon.secondType = Type.findById(secondTypeId);
-
-        return Response.ok(pokemon).build();
+      return pokemonService.updatePokemon(id, typeId, secondTypeId);
     }
 
 
@@ -124,15 +96,7 @@ public class PokemonResource {
         @PathParam("id") int pokedexEntry,
         @FormParam("moveId") Long moveId
     ) {
-        //TODO: FACTOR OUT INTO DAL METHOD
-        //TODO: NULL CHECKING
-        //TODO: MOVES ARENT BEING SAVED
-        Pokemon pokemon = Pokemon.findById(pokedexEntry);
-        Move move = Move.findById(moveId);
-
-        pokemon.moves.add(move);
-
-        return Response.noContent().build();
+       return pokemonService.assignMove(pokedexEntry, moveId);
     }
 
 
@@ -141,9 +105,7 @@ public class PokemonResource {
     @Path("{id}/moves")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPokemonMoves(@PathParam("id") int  id) {
-        //TODO: HANDLE NULL?
-        Pokemon pokemon = Pokemon.findById(id);
-        return Response.ok(pokemon.moves).build();
+      return pokemonService.getPokemonMoves(id);
     }
 
 }

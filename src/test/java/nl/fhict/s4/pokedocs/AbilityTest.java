@@ -1,14 +1,17 @@
 package nl.fhict.s4.pokedocs;
 
 
-import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
+import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.Response;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.http.ContentType;
 import nl.fhict.s4.pokedocs.dal.Ability;
+import nl.fhict.s4.pokedocs.presentation.services.AbilityService;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +20,8 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 @Transactional
 public class AbilityTest {
+
+    @Inject AbilityService abilityService;
 
     Ability ability;
     
@@ -32,78 +37,48 @@ public class AbilityTest {
 
     @Test
     public void addAbility() {
-        Ability result = given()
-        .when()
-        .urlEncodingEnabled(true)
-        .param("name", "Adaptability")
-        .param("description", "Powers up moves of the same type as the Pokémon.")
-        .post("/abilities/").then()
-        .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getObject("$", Ability.class);
+        Response result = abilityService.addAbility("Adaptability", "Powers up moves of the same type as the Pokémon.");
+        Ability resultValue = (Ability)result.getEntity();
 
-            assertEquals(result.name, "Adaptability");
+        assertEquals(resultValue.name, "Adaptability");
+        assertEquals(200, result.getStatus());
     }
 
     @Test
     public void addAbilityNameExists() {
-        given()
-            .when()
-            .urlEncodingEnabled(true)
-            .param("name", "sturdy")
-            .param("description", "pokemon does not go down after one hit")
-            .post("/abilities/").then()
-            .statusCode(409);
+        Response result = abilityService.addAbility("sturdy", "pokemon does not go down after one hit");
+
+        assertEquals(409, result.getStatus()); 
     }
 
     @Test
     public void getAllAbilities() {
-        int abilityCount = given()
-        .when()
-            .get("/abilities/")
-        .then()
-            .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getList("$")
-            .size();
-
-        assertEquals(abilityCount, 1);
+        Response result = abilityService.getAllAbilities();
+        List<?> resultValue = (List<?>)result.getEntity();
+        
+        assertEquals(resultValue.size(), 1);
     }
 
     @Test
     public void deleteAbility() {
-        given().delete("/abilities/" + ability.id)
-        .then()
-            .statusCode(204);
+        Response result = abilityService.deleteAbility(ability.id);
+
+        assertEquals(204, result.getStatus()); 
     }
 
     @Test
     public void getAbility() {
-        Ability result = given()
-        .when()
-        .get("/abilities/" + ability.id).then()
-        .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getObject("$", Ability.class);
-    
-        assertEquals(result.name, "sturdy");
+        Response result = abilityService.getAbility(ability.id);
+        Ability resultValue = (Ability)result.getEntity();
+
+        assertEquals(resultValue.name, "sturdy");
+        assertEquals(200, result.getStatus());
     }
 
     @Test
     public void getAbilityNotFound() {
-        given()
-            .when()
-            .get("/abilities/" + -1).then()
-            .statusCode(404);
+        Response result = abilityService.getAbility((long) -1);
 
+        assertEquals(404, result.getStatus());
     }
 }

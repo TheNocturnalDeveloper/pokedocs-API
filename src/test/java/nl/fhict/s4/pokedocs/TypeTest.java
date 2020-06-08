@@ -1,14 +1,16 @@
 package nl.fhict.s4.pokedocs;
 
-
-import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
+import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.Response;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.http.ContentType;
 import nl.fhict.s4.pokedocs.dal.Type;
+import nl.fhict.s4.pokedocs.presentation.services.TypeService;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +21,8 @@ import org.junit.jupiter.api.Test;
 public class TypeTest {
 
     Type type;
+
+    @Inject TypeService typeService;
 
     @BeforeEach
     public void initDB() {  
@@ -32,78 +36,49 @@ public class TypeTest {
 
     @Test
     public void addType() {
-        Type result = given()
-        .when()
-        .urlEncodingEnabled(true)
-        .param("name", "poison")
-        .post("/types").then()
-        .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getObject("$", Type.class);
+        Response  result = typeService.addType("poison");
+        Type resultValue = (Type)result.getEntity();
 
-            assertEquals(result.name, "poison");
+        assertEquals("poison", resultValue.name);
+        assertEquals(200, result.getStatus());
     }
 
 
     @Test
     public void addTypeNameExists() {
-        given()
-            .when()
-            .urlEncodingEnabled(true)
-            .param("name", "grass")
-            .post("/types/").then()
-            .statusCode(409);
+        Response  result = typeService.addType(type.name);
+   
+        assertEquals(409, result.getStatus());
     }
 
 
     @Test
     public void getAllTypes() {
-        int typeCount = given()
-        .when()
-            .get("/types")
-        .then()
-            .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getList("$")
-            .size();
+        Response  result = typeService.getAllTypes();
+        List<?> resultValue = (List<?>)result.getEntity();
 
-        assertEquals(typeCount, 1);    
+        assertEquals(1, resultValue.size());
+        assertEquals(200, result.getStatus()); 
     }
 
     @Test
     public void deleteType() {
-        given().delete("/types/" + type.id)
-        .then()
-            .statusCode(204);
+        Response  result = typeService.deleteType(type.id);
+        assertEquals(204, result.getStatus());
     }
 
     @Test
     public void getType() {
-        Type result = given()
-        .when()
-        .get("/types/" + type.id).then()
-        .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getObject("$", Type.class);
-        
-        assertEquals(result.name, "grass");
+        Response  result = typeService.getType(type.id);
+        Type resultValue = (Type)result.getEntity();
+
+        assertEquals(type.name, resultValue.name);
+        assertEquals(200, result.getStatus());
     }
 
     @Test
     public void getTypeNotFound() {
-      given()
-        .when()
-        .get("/types/" + -1).then()
-        .statusCode(404);
-
+        Response  result = typeService.getType(Long.valueOf(-1));
+        assertEquals(404, result.getStatus());
     }
 }

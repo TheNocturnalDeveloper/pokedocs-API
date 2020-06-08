@@ -1,14 +1,17 @@
 package nl.fhict.s4.pokedocs;
 
-import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
+import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.Response;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.http.ContentType;
 import nl.fhict.s4.pokedocs.dal.Pokemon;
 import nl.fhict.s4.pokedocs.dal.Type;
+import nl.fhict.s4.pokedocs.presentation.services.PokemonService;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +21,9 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 @Transactional
 public class PokemonTest {
+
+
+    @Inject PokemonService pokemonService;
 
     Type grassType;
     Type poisonType;
@@ -50,42 +56,23 @@ public class PokemonTest {
 
     @Test
     public void addPokemon() {
-        Pokemon result = given()
-        .when()
-        .urlEncodingEnabled(true)
-        .param("pokedexEntry", 2)
-        .param("name", "Ivysaur")
-        .param("typeId", grassType.id)
-        .param("secondTypeId", poisonType.id)
-        .post("/pokemon/").then()
-        .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getObject("$", Pokemon.class);
+        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id, poisonType.id);
+        Pokemon resultValue = (Pokemon)result.getEntity();
 
-        assertEquals(result.name, "Ivysaur");
+        assertEquals(result.getStatus(), 200);
+        assertEquals(resultValue.name, "Ivysaur");
     }
 
 
 
     @Test
     public void searchPokemonType() {
-        Integer pokemonCount = given()
-        .when()
-        .queryParam("typeId", grassType.id)
-            .get("/pokemon/")
-        .then()
-            .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getList("$")
-            .size();
+        Response result = pokemonService.searchPokemon(null, grassType.id, null);
+        List<?> resultValue = (List<?>)result.getEntity();
 
-        assertEquals(pokemonCount, 1);
+
+        assertEquals(200, result.getStatus());
+        assertEquals(resultValue.size(), 1);
     }
 
 
@@ -94,39 +81,23 @@ public class PokemonTest {
 
         Type fireType = Type.addType("fire");
 
-        Integer pokemonCount = given()
-        .when()
-        .queryParam("typeId", fireType.id)
-            .get("/pokemon/")
-        .then()
-            .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getList("$")
-            .size();
+        Response result = pokemonService.searchPokemon(null, fireType.id, null);
+        List<?> resultValue = (List<?>)result.getEntity();
 
-        assertEquals(pokemonCount, 0);
+
+        assertEquals(200, result.getStatus());
+        assertEquals(resultValue.size(), 0);
     }
 
 
     @Test
     public void searchPokemonSecondaryType() {
-        Integer pokemonCount = given()
-        .when()
-        .queryParam("secondTypeId", poisonType.id)
-            .get("/pokemon/")
-        .then()
-            .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getList("$")
-            .size();
+        Response result = pokemonService.searchPokemon(null, null, poisonType.id);
+        List<?> resultValue = (List<?>)result.getEntity();
 
-        assertEquals(pokemonCount, 1);
+
+        assertEquals(200, result.getStatus());
+        assertEquals(resultValue.size(), 1);
     }
 
 
@@ -135,71 +106,43 @@ public class PokemonTest {
 
         Type fireType = Type.addType("fire");
 
-        Integer pokemonCount = given()
-        .when()
-        .queryParam("secondTypeId", fireType.id)
-            .get("/pokemon/")
-        .then()
-            .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getList("$")
-            .size();
+        Response result = pokemonService.searchPokemon(null, fireType.id, null);
+        List<?> resultValue = (List<?>)result.getEntity();
 
-        assertEquals(pokemonCount, 0);
+
+        assertEquals(200, result.getStatus());
+        assertEquals(resultValue.size(), 0);
     }
 
     @Test
     public void searchPokemonName() {
-        int pokemonCount = given()
-        .when()
-        .queryParam("name", "bulb")
-            .get("/pokemon/")
-        .then()
-            .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getList("$") 
-            .size();
 
-        assertEquals(pokemonCount, 1);
+        Response result = pokemonService.searchPokemon("bulb", null, null);
+        List<?> resultValue = (List<?>)result.getEntity();
+
+
+        assertEquals(200, result.getStatus());
+        assertEquals(resultValue.size(), 1);
     }
 
     @Test
     public void searchPokemonNameNoResults() {
-        int pokemonCount = given()
-        .when()
-        .queryParam("name", "ivy")
-            .get("/pokemon/")
-        .then()
-            .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getList("$") 
-            .size();
+        Response result = pokemonService.searchPokemon("ivy", null, null);
+        List<?> resultValue = (List<?>)result.getEntity();
 
-        assertEquals(pokemonCount, 0);
+
+        assertEquals(200, result.getStatus());
+        assertEquals(resultValue.size(), 0);
     }
 
     @Test
     public void getPokemon() {
-        Pokemon result = given()
-        .when()
-        .get("/pokemon/" + pokemon.pokeDexEntry).then()
-        .statusCode(200)
-            .contentType(ContentType.JSON)
-            .extract()
-            .response()
-            .jsonPath()
-            .getObject("$", Pokemon.class);
-        
-        assertEquals(result.name, "bulbasaur");
+        Response result = pokemonService.getPokemon(pokemon.pokeDexEntry);
+        Pokemon resultValue = (Pokemon)result.getEntity();
+
+
+        assertEquals(200, result.getStatus());
+        assertEquals(resultValue.name, "bulbasaur");
     }
 
 }

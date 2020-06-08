@@ -17,25 +17,20 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.StatusType;
 
-import org.eclipse.microprofile.jwt.JsonWebToken;
-
-import io.quarkus.panache.common.Parameters;
-import nl.fhict.s4.pokedocs.dal.Move;
-import nl.fhict.s4.pokedocs.dal.Type;
+import nl.fhict.s4.pokedocs.presentation.services.MoveService;
 
 @Path("moves")
 @RequestScoped
 public class MoveResource {
-    @Inject
-    JsonWebToken jwt;
+
+    @Inject MoveService moveService;
 
     @GET
     @PermitAll
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllMoves() {
-        return Response.ok(Move.listAll()).build();
+       return moveService.getAllMoves();
     }
 
     @GET
@@ -43,14 +38,7 @@ public class MoveResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMove(@PathParam("id") long  id) {
-        //TODO: HANDLE NULL?
-        Move move = Move.findById(id);
-        
-        if(move == null) {
-            return Response.status(404).build();
-        }
-
-        return Response.ok(move).build();
+       return moveService.getMove(id);
     }
 
 
@@ -64,20 +52,7 @@ public class MoveResource {
         @FormParam("description") String description,  
         @FormParam("type") Long typeId
     ) {
-
-        if(Move.count("name = :name", Parameters.with("name", name)) > 0) {
-            //return a conflict response if the move already exists
-            return Response.status(409).build();
-        }
-
-        Move move = new Move();
-        move.name = name;
-        move.description = description;
-        move.type = Type.findById(typeId);
-
-        move.persist();
-
-        return Response.ok(move).build();
+        return moveService.addMove(name, description, typeId);
     }
 
 
@@ -91,12 +66,7 @@ public class MoveResource {
         @FormParam("type") Long typeId,
         @FormParam("description") String description
     ) {
-        
-        Move move = Move.findById(id);
-        move.type = Type.findById(typeId);
-        move.description = description;
-
-        return Response.ok(move).build();
+        return moveService.updateMove(id, typeId, description);
     }
 
 
@@ -105,10 +75,6 @@ public class MoveResource {
     @Path("{id}")
     @Transactional
     public Response deleteMove(@PathParam("id") long id) {
-        //TODO: HANDLE NULL?
-        //TODO: BLOCK IF USED BY ONE OR MORE POKEMON?
-     
-        Move.findById(id).delete();
-        return Response.noContent().build();
+        return moveService.deleteMove(id);
     }
 }

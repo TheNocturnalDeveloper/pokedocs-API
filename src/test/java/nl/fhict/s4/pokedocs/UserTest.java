@@ -5,13 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.Response;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 
 import io.restassured.http.Cookies;
 import nl.fhict.s4.pokedocs.dal.User;
+import nl.fhict.s4.pokedocs.presentation.services.UserService;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,10 +27,13 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 @TestInstance(Lifecycle.PER_CLASS)
 public class UserTest {
 
+    @Inject UserService userService;
+
+    User user;
 
     @BeforeEach
     public void initDB() {
-        User.add("user", "password", "User");
+        user = User.add("user", "password", "User");
     }
 
     @AfterEach
@@ -69,57 +75,35 @@ public class UserTest {
 
 
     @Test
-    public void RegisterUser() {
-        User result = given()
-            .when()
-            .urlEncodingEnabled(true)
-            .param("username", "user2")
-            .param("password", "test")
-            .post("/users/register").then()
-            .statusCode(201)
-                .contentType(ContentType.JSON)
-                .extract()
-                .response()
-                .jsonPath()
-                .getObject("$", User.class);
-
-        assertEquals(result.role, "User");
-        assertEquals(result.username, "user2");
+    public void registerUser() {
+        Response result = userService.Register("user2", "test");
+        User ResultValue = (User)result.getEntity();
+        
+        assertEquals(201, result.getStatus());
+        assertEquals(ResultValue.role, "User");
+        assertEquals(ResultValue.username, "user2");
     }
 
 
     @Test
-    public void RegisterUserUsernameTaken() {
-       given()
-            .when()
-            .urlEncodingEnabled(true)
-            .param("username", "user")
-            .param("password", "test")
-            .post("/users/register").then()
-            .statusCode(409);
-                
+    public void registerUserUsernameTaken() {
+        Response result = userService.Register(user.username, "test");
+        
+        assertEquals(409, result.getStatus());           
     }
 
     @Test
-    public void loginUser() {  
-        given()
-            .when()
-            .urlEncodingEnabled(true)
-            .param("username", "user")
-            .param("password", "password")
-            .post("/users/login").then()
-            .statusCode(204);
+    public void loginUser() throws Exception {
+        Response result = userService.login(user.username, "password");
+        
+        assertEquals(204, result.getStatus());      
     }
 
     @Test
-    public void loginUserIncorrectCredentials() {
-        given()
-            .when()
-            .urlEncodingEnabled(true)
-            .param("username", "user")
-            .param("password", "")
-            .post("/users/login").then()
-            .statusCode(401);
+    public void loginUserIncorrectCredentials() throws Exception {
+        Response result = userService.login("", "");
+        
+        assertEquals(401, result.getStatus()); 
     }
 
 

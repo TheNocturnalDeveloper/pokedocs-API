@@ -16,23 +16,20 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import io.quarkus.panache.common.Parameters;
-import nl.fhict.s4.pokedocs.dal.Ability;
+import nl.fhict.s4.pokedocs.presentation.services.AbilityService;
 
 @Path("abilities")
 @RequestScoped
 public class AbilityResource {
-    @Inject
-    JsonWebToken jwt;
 
+    @Inject AbilityService abilityService;
 
     @GET
     @PermitAll
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllTypes() {
-        return Response.ok(Ability.listAll()).build();
+    public Response getAllAbilities() {
+        return abilityService.getAllAbilities();
     }
 
     @GET
@@ -40,14 +37,7 @@ public class AbilityResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAbility(@PathParam("id") long id) {
-        //TODO: HANDLE NULL?
-        Ability ability = Ability.findById(id);
-
-        if(ability == null) {
-            return Response.status(404).build();
-        }
-
-        return Response.ok(ability).build();
+       return abilityService.getAbility(id);
     }
 
     @DELETE
@@ -55,11 +45,7 @@ public class AbilityResource {
     @Path("{id}")
     @Transactional
     public Response deleteAbility(@PathParam("id") long id) {
-        //TODO: HANDLE NULL?
-        //TODO: BLOCK IF USED BY ONE OR MORE POKEMON?
-        //TODO: STATUS AND RETURN VALUE OF DELETE?
-        Ability.findById(id).delete();
-        return Response.noContent().build();
+       return abilityService.deleteAbility(id);
     }
 
 
@@ -69,16 +55,7 @@ public class AbilityResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Transactional
     public Response addAbility(@FormParam("name") String name, @FormParam("description") String description) {
-
-
-        if(Ability.count("name = :name", Parameters.with("name", name)) > 0) {
-            //return a conflict response if the ability already exists
-            return Response.status(409).build();
-        }
-
-        Ability ability = Ability.addAbility(name, description);
-        
-        return Response.ok(ability).build();
+        return abilityService.addAbility(name, description);
     }
 
 
@@ -91,11 +68,7 @@ public class AbilityResource {
         @PathParam("id") long id,
         @FormParam("description") String description
     ) {
-        //TODO: also update name?
-        Ability ability = Ability.findById(id);
-        ability.description = description;
-
-        return Response.ok(ability).build();
+        return abilityService.updateAbility(id, description);
     }
 
 }
