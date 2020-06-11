@@ -27,8 +27,6 @@ public class PokemonResource {
 
     @Inject PokemonService pokemonService;
 
-    //TODO: MOVE OPENAPI DATA TO YAML FILES
-    //TODO: SWITCH TO TYPE ID INSTEAD OF NAME
     @GET
     @PermitAll
     @Produces(MediaType.APPLICATION_JSON)

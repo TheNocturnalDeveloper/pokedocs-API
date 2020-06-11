@@ -20,7 +20,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Entity
 @Table(name = "pokemon")
-public class Pokemon extends PanacheEntityBase  implements Serializable{
+public class Pokemon extends PanacheEntityBase  implements Serializable {
 
 	private static final long serialVersionUID = -254654171295989299L;
 
@@ -78,5 +78,30 @@ public class Pokemon extends PanacheEntityBase  implements Serializable{
         }
         
         return  Pokemon.find(queryBuffer.toString(), params).list();
+    }
+
+    public static long getPokemonWithTypeCount(Long typeId, Long secondTypeId) {
+
+        if(typeId == null) {
+            //the primary type may not be null
+            throw new IllegalArgumentException("typeId cannot be null");
+        }
+
+        Map<String, Object> params =  new HashMap<>();
+        params.put("typeId", typeId);
+        
+        StringBuffer queryBuffer = new StringBuffer("from Pokemon p");
+
+       
+        if(secondTypeId == null) {
+            queryBuffer.append(" where p.type.id = :typeId or p.secondType.id = :typeId");
+        }
+        else {
+            //check both combinations of type + second type
+            queryBuffer.append(" where (p.type.id = :typeId and p.secondType.id = :secondTypeId) or (p.type.id = :secondTypeId and p.secondType.id = :typeId)");
+            params.put("secondTypeId", secondTypeId);
+        }
+
+        return Pokemon.count(queryBuffer.toString(), params);
     }
 }

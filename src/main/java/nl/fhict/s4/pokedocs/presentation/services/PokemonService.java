@@ -2,6 +2,7 @@ package nl.fhict.s4.pokedocs.presentation.services;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import nl.fhict.s4.pokedocs.dal.Move;
 import nl.fhict.s4.pokedocs.dal.Pokemon;
@@ -21,17 +22,21 @@ public class PokemonService {
     }
 
     public Response deletePokemon(Integer id) {
-        //TODO: HANDLE NULL?
-        //TODO: STATUS AND RETURN VALUE OF DELETE?
         Pokemon.findById(id).delete();
         return Response.noContent().build();
     }
 
-    public Response addPokemon(Integer pokedexEntry, String name, Long typeId, Long secondTypeId) {
+    public Response addPokemon(Integer pokedexEntry, String name, Long typeId, Long secondTypeId) {   
+
+        if(Pokemon.getPokemonWithTypeCount(typeId, secondTypeId) > Pokemon.count() / 2) {
+            //a pokemon may only be added if both types exist in less than 50% of pokemon
+            return Response.status(Status.FORBIDDEN).build();
+        }
+
         Pokemon pokemon = new Pokemon();
-        pokemon.pokeDexEntry = pokedexEntry; //check if unique
+        pokemon.pokeDexEntry = pokedexEntry;
         pokemon.name = name;
-        pokemon.type = Type.findById(typeId); //check null
+        pokemon.type = Type.findById(typeId);
         pokemon.secondType = secondTypeId != null ? Type.findById(secondTypeId) : null;
         
         pokemon.persist();
@@ -41,10 +46,12 @@ public class PokemonService {
 
 
     public Response updatePokemon(Integer id, Long typeId, Long secondTypeId) {
-        //TODO: UPDATE MOVES?
         Pokemon pokemon = Pokemon.findById(id);
         pokemon.type= Type.findById(typeId);
-        pokemon.secondType = Type.findById(secondTypeId);
+
+        if(secondTypeId != null) {
+            pokemon.secondType = Type.findById(secondTypeId);
+        }
 
         return Response.ok(pokemon).build();
     }
