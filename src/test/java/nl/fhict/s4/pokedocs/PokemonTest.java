@@ -27,6 +27,7 @@ public class PokemonTest {
 
     Type grassType;
     Type poisonType;
+    Type fireType;
 
     Pokemon pokemon;
 
@@ -36,6 +37,7 @@ public class PokemonTest {
 
         grassType  = Type.addType("grass");
         poisonType = Type.addType("poison");
+        fireType   = Type.addType("fire");
 
     
         pokemon = new Pokemon();
@@ -56,11 +58,41 @@ public class PokemonTest {
 
     @Test
     public void addPokemon() {
-        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id, poisonType.id);
+        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id, fireType.id);
         Pokemon resultValue = (Pokemon)result.getEntity();
 
-        assertEquals(result.getStatus(), 200);
+        assertEquals(200, result.getStatus());
         assertEquals(resultValue.name, "Ivysaur");
+    }
+
+    @Test
+    public void addPokemonTypePercentageTooHigh() {
+        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id, poisonType.id);
+
+        assertEquals(403, result.getStatus());
+    }
+
+
+    @Test
+    public void addPokemonTypePercentageTooHighReverse() {
+        Response result = pokemonService.addPokemon(2, "Ivysaur", poisonType.id,  grassType.id);
+
+        assertEquals(403, result.getStatus());
+    }
+
+
+    @Test
+    public void addPokemonTypePercentageTooHighSingle() {
+        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id,  null);
+
+        assertEquals(403, result.getStatus());
+    }
+
+    @Test
+    public void addPokemonTypePercentageTooHighSingleSecondary() {
+        Response result = pokemonService.addPokemon(2, "Ivysaur", poisonType.id,  null);
+
+        assertEquals(403, result.getStatus());
     }
 
 
@@ -79,8 +111,6 @@ public class PokemonTest {
     @Test
     public void searchPokemonTypeNoResult() {
 
-        Type fireType = Type.addType("fire");
-
         Response result = pokemonService.searchPokemon(null, fireType.id, null);
         List<?> resultValue = (List<?>)result.getEntity();
 
@@ -92,6 +122,7 @@ public class PokemonTest {
 
     @Test
     public void searchPokemonSecondaryType() {
+
         Response result = pokemonService.searchPokemon(null, null, poisonType.id);
         List<?> resultValue = (List<?>)result.getEntity();
 
@@ -103,8 +134,6 @@ public class PokemonTest {
 
     @Test
     public void searchPokemonSecondaryTypeNoResult() {
-
-        Type fireType = Type.addType("fire");
 
         Response result = pokemonService.searchPokemon(null, fireType.id, null);
         List<?> resultValue = (List<?>)result.getEntity();
