@@ -15,7 +15,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import nl.fhict.s4.pokedocs.presentation.services.TypeService;
 
@@ -23,7 +22,6 @@ import nl.fhict.s4.pokedocs.presentation.services.TypeService;
 @RequestScoped
 public class TypeResource {
 
-    @Inject JsonWebToken jwt;
     @Inject TypeService typeService;
 
     @GET
