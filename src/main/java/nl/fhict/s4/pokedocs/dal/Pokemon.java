@@ -94,7 +94,7 @@ public class Pokemon extends PanacheEntityBase  implements Serializable {
 
        
         if(secondTypeId == null) {
-            queryBuffer.append(" where p.type.id = :typeId or p.secondType.id = :typeId");
+            queryBuffer.append(" where p.type.id = :typeId");
         }
         else {
             //check both combinations of type + second type

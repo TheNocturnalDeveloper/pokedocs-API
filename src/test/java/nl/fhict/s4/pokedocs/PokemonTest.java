@@ -39,7 +39,6 @@ public class PokemonTest {
         poisonType = Type.addType("poison");
         fireType   = Type.addType("fire");
 
-    
         pokemon = new Pokemon();
         pokemon.pokeDexEntry = 1;
         pokemon.name = "bulbasaur";
@@ -88,20 +87,11 @@ public class PokemonTest {
         assertEquals(403, result.getStatus());
     }
 
-    @Test
-    public void addPokemonTypePercentageTooHighSingleSecondary() {
-        Response result = pokemonService.addPokemon(2, "Ivysaur", poisonType.id,  null);
-
-        assertEquals(403, result.getStatus());
-    }
-
-
 
     @Test
     public void searchPokemonType() {
         Response result = pokemonService.searchPokemon(null, grassType.id, null);
         List<?> resultValue = (List<?>)result.getEntity();
-
 
         assertEquals(200, result.getStatus());
         assertEquals(resultValue.size(), 1);
@@ -114,7 +104,6 @@ public class PokemonTest {
         Response result = pokemonService.searchPokemon(null, fireType.id, null);
         List<?> resultValue = (List<?>)result.getEntity();
 
-
         assertEquals(200, result.getStatus());
         assertEquals(resultValue.size(), 0);
     }
@@ -125,7 +114,6 @@ public class PokemonTest {
 
         Response result = pokemonService.searchPokemon(null, null, poisonType.id);
         List<?> resultValue = (List<?>)result.getEntity();
-
 
         assertEquals(200, result.getStatus());
         assertEquals(resultValue.size(), 1);
@@ -138,7 +126,6 @@ public class PokemonTest {
         Response result = pokemonService.searchPokemon(null, fireType.id, null);
         List<?> resultValue = (List<?>)result.getEntity();
 
-
         assertEquals(200, result.getStatus());
         assertEquals(resultValue.size(), 0);
     }
@@ -149,7 +136,6 @@ public class PokemonTest {
         Response result = pokemonService.searchPokemon("bulb", null, null);
         List<?> resultValue = (List<?>)result.getEntity();
 
-
         assertEquals(200, result.getStatus());
         assertEquals(resultValue.size(), 1);
     }
@@ -159,7 +145,6 @@ public class PokemonTest {
         Response result = pokemonService.searchPokemon("ivy", null, null);
         List<?> resultValue = (List<?>)result.getEntity();
 
-
         assertEquals(200, result.getStatus());
         assertEquals(resultValue.size(), 0);
     }
@@ -168,7 +153,6 @@ public class PokemonTest {
     public void getPokemon() {
         Response result = pokemonService.getPokemon(pokemon.pokeDexEntry);
         Pokemon resultValue = (Pokemon)result.getEntity();
-
 
         assertEquals(200, result.getStatus());
         assertEquals(resultValue.name, "bulbasaur");
