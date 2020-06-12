@@ -11,6 +11,19 @@ services:
       POSTGRES_PASSWORD: "test"
       POSTGRES_DB: "pokedocs"
 
+  keycloak:
+    image: jboss/keycloak:9.0.3
+    restart: always
+    volumes:
+        - "./realm-export.json:/tmp/realm-export.json"
+    ports:
+        - "8180:8080"
+    environment:
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: admin
+        DB_VENDOR: H2
+        KEYCLOAK_IMPORT: /tmp/realm-export.json
+
   # quarkus_api:
   #   depends_on:
   #     - postgres
