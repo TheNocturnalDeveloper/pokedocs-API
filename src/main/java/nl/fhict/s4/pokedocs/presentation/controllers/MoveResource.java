@@ -18,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.quarkus.security.Authenticated;
 import nl.fhict.s4.pokedocs.presentation.services.MoveService;
 
 @Path("moves")
@@ -43,7 +44,7 @@ public class MoveResource {
 
 
     @POST
-    @PermitAll
+    @Authenticated
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Transactional
@@ -57,7 +58,7 @@ public class MoveResource {
 
 
     @PUT
-    @PermitAll
+    @Authenticated
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("{id}")
@@ -71,7 +72,7 @@ public class MoveResource {
 
 
     @DELETE
-    @PermitAll
+    @Authenticated
     @Path("{id}")
     @Transactional
     public Response deleteMove(@PathParam("id") long id) {

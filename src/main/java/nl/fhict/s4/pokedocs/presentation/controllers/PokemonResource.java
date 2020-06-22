@@ -17,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.quarkus.security.Authenticated;
 import nl.fhict.s4.pokedocs.presentation.services.PokemonService;
 
 
@@ -49,7 +50,7 @@ public class PokemonResource {
 
 
     @DELETE
-    @PermitAll
+    @Authenticated
     @Path("{id}")
     public Response deletePokemon(@PathParam("id") int id) {
         return pokemonService.deletePokemon(id);
@@ -57,7 +58,7 @@ public class PokemonResource {
 
 
     @POST
-    @PermitAll
+    @Authenticated
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Transactional
@@ -72,7 +73,7 @@ public class PokemonResource {
     }
 
     @PUT
-    @PermitAll
+    @Authenticated
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("{id}")
@@ -90,7 +91,7 @@ public class PokemonResource {
 
 
     @POST
-    @PermitAll
+    @Authenticated
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("{id}/moves")

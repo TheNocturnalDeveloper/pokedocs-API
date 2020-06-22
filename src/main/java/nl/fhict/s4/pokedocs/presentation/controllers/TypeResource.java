@@ -16,7 +16,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-
+import io.quarkus.security.Authenticated;
 import nl.fhict.s4.pokedocs.presentation.services.TypeService;
 
 @Path("types")
@@ -42,7 +42,7 @@ public class TypeResource {
 
 
     @DELETE
-    @PermitAll
+    @Authenticated
     @Path("{id}")
     @Transactional
     public Response deleteType(@PathParam("id") long id) {
@@ -51,7 +51,7 @@ public class TypeResource {
 
 
     @POST
-    @PermitAll
+    @Authenticated
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Transactional
@@ -61,7 +61,7 @@ public class TypeResource {
 
 
     @PUT
-    @PermitAll
+    @Authenticated
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("{id}")
