@@ -1,6 +1,7 @@
 package nl.fhict.s4.pokedocs.presentation.services;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import io.quarkus.panache.common.Parameters;
 import nl.fhict.s4.pokedocs.dal.Ability;
@@ -9,10 +10,14 @@ import nl.fhict.s4.pokedocs.dal.Ability;
 public class AbilityService {
 
     public Response deleteAbility(Long id) {
-         //TODO: HANDLE NULL?
-        //TODO: BLOCK IF USED BY ONE OR MORE POKEMON?
-        //TODO: STATUS AND RETURN VALUE OF DELETE?
-        Ability.findById(id).delete();
+        Ability ability = Ability.findById(id);
+
+        if(ability == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        ability.delete();
+
         return Response.noContent().build();
     }
 
@@ -21,11 +26,10 @@ public class AbilityService {
     }
 
     public Response getAbility(Long id) {
-         //TODO: HANDLE NULL?
          Ability ability = Ability.findById(id);
 
          if(ability == null) {
-             return Response.status(404).build();
+             return Response.status(Status.NOT_FOUND).build();
          }
  
          return Response.ok(ability).build();
@@ -34,7 +38,7 @@ public class AbilityService {
     public Response addAbility(String name, String description) {
         if(Ability.count("name = :name", Parameters.with("name", name)) > 0) {
             //return a conflict response if the ability already exists
-            return Response.status(409).build();
+            return Response.status(Status.CONFLICT).build();
         }
 
         Ability ability = Ability.addAbility(name, description);
@@ -43,7 +47,6 @@ public class AbilityService {
     }
 
     public Response updateAbility(Long id, String description) {
-        //TODO: also update name?
         Ability ability = Ability.findById(id);
         ability.description = description;
 

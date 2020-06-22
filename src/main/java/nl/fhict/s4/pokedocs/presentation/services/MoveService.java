@@ -2,6 +2,7 @@ package nl.fhict.s4.pokedocs.presentation.services;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import io.quarkus.panache.common.Parameters;
 import nl.fhict.s4.pokedocs.dal.Move;
@@ -15,7 +16,6 @@ public class MoveService {
     }
 
     public Response getMove(Long  id) {
-        //TODO: HANDLE NULL?
         Move move = Move.findById(id);
         
         if(move == null) {
@@ -29,13 +29,19 @@ public class MoveService {
 
         if(Move.count("name = :name", Parameters.with("name", name)) > 0) {
             //return a conflict response if the move already exists
-            return Response.status(409).build();
+            return Response.status(Status.CONFLICT).build();
+        }
+
+        Type type = Type.findById(typeId);
+
+        if(type == null) {
+            return Response.status(Status.BAD_REQUEST).build();
         }
 
         Move move = new Move();
         move.name = name;
         move.description = description;
-        move.type = Type.findById(typeId);
+        move.type = type;
 
         move.persist();
 
@@ -52,7 +58,6 @@ public class MoveService {
     }
 
     public Response deleteMove(Long id) {
-        //TODO: HANDLE NULL?
         //TODO: BLOCK IF USED BY ONE OR MORE POKEMON?
      
         Move.findById(id).delete();
