@@ -8,6 +8,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -56,6 +57,17 @@ public class TypeResource {
     @Transactional
     public Response addType(@FormParam("name") String name) {
       return typeService.addType(name);
+    }
+
+
+    @PUT
+    @PermitAll
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("{id}")
+    @Transactional
+    public Response updateType(@PathParam("id") long id, @FormParam("name") String name) {
+      return typeService.updateType(id, name);
     }
 
 }

@@ -15,7 +15,6 @@ public class TypeService {
             //return a conflict response if the move already exists
             return Response.status(409).build();
         }
-
         Type type = new Type();
         type.name = name;
         type.persist();
@@ -38,12 +37,23 @@ public class TypeService {
     }
 
     public Response deleteType(Long id) {
-        //TODO: HANDLE NULL?
+ 
         //TODO: BLOCK IF USED BY ONE OR MORE POKEMON?
-        //TODO: STATUS AND RETURN VALUE OF DELETE?
-        Type.findById(id).delete();
+        Type type = Type.findById(id);
+
+        if(type == null) {
+            return Response.status(404).build();
+        }
+
+        type.delete();
         return Response.noContent().build();
     }
+
+	public Response updateType(Long id, String name) {
+        Type type = Type.findById(id);
+        type.name = name;
+        return Response.ok(type).build();
+	}
 
     
 }
