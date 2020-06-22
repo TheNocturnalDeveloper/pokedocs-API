@@ -25,6 +25,7 @@ import nl.fhict.s4.pokedocs.presentation.services.PokemonService;
 @RequestScoped
 public class PokemonResource {
 
+    
     @Inject PokemonService pokemonService;
 
     @GET
@@ -64,9 +65,10 @@ public class PokemonResource {
         @FormParam("pokedexEntry") int pokedexEntry,
         @FormParam("name") String name, 
         @FormParam("typeId") Long typeId, 
-        @FormParam("secondTypeId") Long secondTypeId
+        @FormParam("secondTypeId") Long secondTypeId,
+        @FormParam("image") String image
     ) {
-       return pokemonService.addPokemon(pokedexEntry, name, typeId, secondTypeId);
+       return pokemonService.addPokemon(pokedexEntry, name, typeId, secondTypeId, image);
     }
 
     @PUT
@@ -74,12 +76,15 @@ public class PokemonResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("{id}")
+    @Transactional
     public Response updatePokemon(
-        @PathParam("id") int id,
-        @FormParam("type") Long typeId, 
-        @FormParam("secondType") Long secondTypeId
+        @PathParam("id") Integer id,
+        @FormParam("name") String name, 
+        @FormParam("typeId") Long typeId, 
+        @FormParam("secondTypeId") Long secondTypeId,
+        @FormParam("image") String image
     ) {
-      return pokemonService.updatePokemon(id, typeId, secondTypeId);
+      return pokemonService.updatePokemon(id, name, typeId, secondTypeId, image);
     }
 
 

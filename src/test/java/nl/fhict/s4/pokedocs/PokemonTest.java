@@ -44,6 +44,7 @@ public class PokemonTest {
         pokemon.name = "bulbasaur";
         pokemon.type = grassType;
         pokemon.secondType = poisonType;
+        pokemon.image = "image";
         pokemon.persist();
     }
 
@@ -57,7 +58,7 @@ public class PokemonTest {
 
     @Test
     public void addPokemon() {
-        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id, fireType.id);
+        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id, fireType.id, "image");
         Pokemon resultValue = (Pokemon)result.getEntity();
 
         assertEquals(200, result.getStatus());
@@ -66,7 +67,7 @@ public class PokemonTest {
 
     @Test
     public void addPokemonTypePercentageTooHigh() {
-        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id, poisonType.id);
+        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id, poisonType.id, "image");
 
         assertEquals(403, result.getStatus());
     }
@@ -74,7 +75,7 @@ public class PokemonTest {
 
     @Test
     public void addPokemonTypePercentageTooHighReverse() {
-        Response result = pokemonService.addPokemon(2, "Ivysaur", poisonType.id,  grassType.id);
+        Response result = pokemonService.addPokemon(2, "Ivysaur", poisonType.id,  grassType.id, "image");
 
         assertEquals(403, result.getStatus());
     }
@@ -82,7 +83,7 @@ public class PokemonTest {
 
     @Test
     public void addPokemonTypePercentageTooHighSingle() {
-        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id,  null);
+        Response result = pokemonService.addPokemon(2, "Ivysaur", grassType.id,  null, "image");
 
         assertEquals(403, result.getStatus());
     }
@@ -156,6 +157,18 @@ public class PokemonTest {
 
         assertEquals(200, result.getStatus());
         assertEquals(resultValue.name, "bulbasaur");
+    }
+
+    @Test
+    public void updatePokemon() {
+        Response result = pokemonService.updatePokemon(pokemon.pokeDexEntry, "ivysaur",  fireType.id, fireType.id, "image2");
+        Pokemon resultValue = (Pokemon)result.getEntity();
+
+        assertEquals(200, result.getStatus());
+        assertEquals("ivysaur", resultValue.name);
+        assertEquals(resultValue.type.id, fireType.id);
+        assertEquals(resultValue.secondType.id, fireType.id);
+        assertEquals("image2", resultValue.image);
     }
 
 }

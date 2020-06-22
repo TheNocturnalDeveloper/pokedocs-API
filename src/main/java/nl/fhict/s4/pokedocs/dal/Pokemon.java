@@ -1,5 +1,6 @@
 package nl.fhict.s4.pokedocs.dal;
 
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -41,14 +43,22 @@ public class Pokemon extends PanacheEntityBase  implements Serializable {
     @ManyToOne
     public Type secondType;
 
+    @Column(name = "image", nullable = false)
+    public String image;
+
     @ManyToMany
+    @JsonbTransient
     public Set<Move> moves = new HashSet<>();
+
+    public static Boolean exists(Integer pokedexEntry, String name) {
+        return Pokemon.count("name = :name or pokeDexEntry = :pokedexEntry", Map.of("name", name, "pokedexEntry", pokedexEntry)) >= 1;
+    }
 
     public static List<Pokemon> search(String name,  Long typeId, Long secondTypeId) {
         //use criteria
         //JpaOperations.getEntityManager()
         Map<String, Object> params = new HashMap<>();
-        StringBuffer queryBuffer = new StringBuffer("from Pokemon p");
+        StringBuilder queryBuffer = new StringBuilder("from Pokemon p");
         Boolean first = true;
 
         if(name != null) {
@@ -90,7 +100,7 @@ public class Pokemon extends PanacheEntityBase  implements Serializable {
         Map<String, Object> params =  new HashMap<>();
         params.put("typeId", typeId);
         
-        StringBuffer queryBuffer = new StringBuffer("from Pokemon p");
+        StringBuilder queryBuffer = new StringBuilder("from Pokemon p");
 
        
         if(secondTypeId == null) {
@@ -103,5 +113,11 @@ public class Pokemon extends PanacheEntityBase  implements Serializable {
         }
 
         return Pokemon.count(queryBuffer.toString(), params);
+    }
+
+
+    //for safety reasons deserialization is not allowed
+    private final void readObject(ObjectInputStream in) throws java.io.IOException {
+        throw new java.io.IOException("Cannot be deserialized");
     }
 }
